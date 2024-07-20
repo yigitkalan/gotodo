@@ -1,87 +1,34 @@
-package main
+package operations
 
 import (
 	"bufio"
 	"fmt"
 	"os"
 	"strconv"
+    m "github.com/yigitkalan/gotodo/app/models"
 )
 
-type Operation int8
 
-const (
-	Exit Operation = iota
-	List
-	Add
-	Complete
-	Remove
-	Help
-)
-var operationNames = map[Operation]string{
-    Exit:     "Exit",
-    List:     "List",
-    Add:      "Add",
-    Complete: "Complete",
-    Remove:   "Remove",
-    Help:     "Help",
-}
+var tasks []m.Task
 
-type Task struct {
-	ID          int
-	Description string
-	Completed   bool
-}
 
-var tasks []Task
-
-func (o Operation) String() string {
-    return operationNames[o]
-}
-
-func (operation Operation) Operate() {
+func Operate(operation m.Operation) {
 	switch operation {
-	case Add:
+	case m.Add:
 		AddTask()
-	case Complete:
+	case m.Complete:
 		CompleteTask()
-	case Exit:
+	case m.Exit:
 		os.Exit(0)
-	case Help:
+	case m.Help:
 		ShowHelp()
-	case List:
+	case m.List:
 		ListTasks()
-	case Remove:
+	case m.Remove:
 		RemoveTask()
 	default:
 		panic(fmt.Sprintf("unexpected main.Operation: %#v", operation))
 	}
-}
-
-func main() {
-	fmt.Println("Welcome to the task manager!")
-	ShowHelp()
-	AppLoop()
-}
-
-func AppLoop() {
-	scanner := bufio.NewScanner(os.Stdin)
-	fmt.Print("--> ")
-	for scanner.Scan() {
-		line := scanner.Text()
-		option, err := strconv.Atoi(line)
-		if err != nil || option < 0 || option > int(Help) {
-			fmt.Println("Invalid option, please try again")
-			fmt.Print("--> ")
-			continue
-		}
-		operation := Operation(option)
-
-		operation.Operate()
-
-		fmt.Println()
-		fmt.Print("--> ")
-	}
-
 }
 
 
@@ -120,9 +67,9 @@ func ListTasks() {
 
 func ShowHelp() {
 	fmt.Println("\nThe following commands are available:")
-    for i := 0; i < 5; i++ { 
-        fmt.Println(i, "-", Operation(i))
-    }
+	for i := 0; i < 5; i++ {
+		fmt.Println(i, "-", m.Operation(i))
+	}
 }
 
 func CompleteTask() {
@@ -153,6 +100,6 @@ func AddTask() {
 	fmt.Print("Please enter the description of the task: ")
 	scanner.Scan()
 	description := scanner.Text()
-	tasks = append(tasks, Task{ID: len(tasks), Description: description, Completed: false})
+	tasks = append(tasks, m.Task{ID: len(tasks), Description: description, Completed: false})
 
 }
