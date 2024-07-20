@@ -1,16 +1,14 @@
-package operations
+package utils
 
 import (
 	"bufio"
 	"fmt"
+	m "github.com/yigitkalan/gotodo/app/models"
 	"os"
 	"strconv"
-    m "github.com/yigitkalan/gotodo/app/models"
 )
 
-
-var tasks []m.Task
-
+var tasks []m.Item
 
 func Operate(operation m.Operation) {
 	switch operation {
@@ -19,7 +17,7 @@ func Operate(operation m.Operation) {
 	case m.Complete:
 		CompleteTask()
 	case m.Exit:
-		os.Exit(0)
+		Exit()
 	case m.Help:
 		ShowHelp()
 	case m.List:
@@ -30,7 +28,6 @@ func Operate(operation m.Operation) {
 		panic(fmt.Sprintf("unexpected main.Operation: %#v", operation))
 	}
 }
-
 
 func RemoveTask() {
 	idToRemove := GetIdFromUser()
@@ -100,6 +97,19 @@ func AddTask() {
 	fmt.Print("Please enter the description of the task: ")
 	scanner.Scan()
 	description := scanner.Text()
-	tasks = append(tasks, m.Task{ID: len(tasks), Description: description, Completed: false})
+	tasks = append(tasks, m.Item{ID: len(tasks), Description: description, Completed: false})
 
+}
+
+func Exit() {
+	err := SaveToFile(tasks)
+	if err != nil {
+		fmt.Println("Error saving tasks to file")
+	}else {
+		os.Exit(0)
+	}
+}
+
+func SetTasks(newTasks []m.Item) {
+    tasks = newTasks
 }
