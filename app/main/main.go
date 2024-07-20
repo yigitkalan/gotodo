@@ -3,22 +3,26 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"os"
-	"strconv"
 	"github.com/yigitkalan/gotodo/app/models"
 	"github.com/yigitkalan/gotodo/app/utils"
+	"os"
+	"strconv"
 )
-
 
 func main() {
 	fmt.Println("Welcome to the task manager!")
-	operations.ShowHelp()
+	utils.ShowHelp()
 	AppLoop()
 }
 
 func AppLoop() {
 	scanner := bufio.NewScanner(os.Stdin)
 	fmt.Print("--> ")
+	tasks, err := utils.LoadFromFile()
+	if err != nil {
+		fmt.Println("Error loading tasks from file")
+	}
+	utils.SetTasks(tasks)
 	for scanner.Scan() {
 		line := scanner.Text()
 		option, err := strconv.Atoi(line)
@@ -27,13 +31,8 @@ func AppLoop() {
 			fmt.Print("--> ")
 			continue
 		}
-		operation := models.Operation(option)
-
-		operations.Operate(operation)
-
+		utils.Operate(models.Operation(option))
 		fmt.Println()
 		fmt.Print("--> ")
 	}
-
 }
-

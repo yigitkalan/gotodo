@@ -1,6 +1,6 @@
 package models
 
-type Task struct {
+type Item struct {
 	ID          int
 	Description string
 	Completed   bool
