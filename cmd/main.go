@@ -10,30 +10,32 @@ import (
 type Operation int8
 
 const (
-	Add Operation = iota
-	Remove
-	Complete
+	Exit Operation = iota
 	List
-	Exit
+	Add
+	Complete
+	Remove
 	Help
 )
+var operationNames = map[Operation]string{
+    Exit:     "Exit",
+    List:     "List",
+    Add:      "Add",
+    Complete: "Complete",
+    Remove:   "Remove",
+    Help:     "Help",
+}
 
-func main() {
-	fmt.Println("Welcome to the task manager!")
-	ShowHelp()
-	scanner := bufio.NewScanner(os.Stdin)
-	fmt.Print("Select an option: ")
-	for scanner.Scan() {
-		line := scanner.Text()
-		option, err := strconv.Atoi(line)
-		if err != nil || option < 0 || option > int(Help) {
-			fmt.Println("Invalid option, please try again")
-			fmt.Print("Select an option: ")
-			continue
-		}
+type Task struct {
+	ID          int
+	Description string
+	Completed   bool
+}
 
-		fmt.Print("Select an option: ")
-	}
+var tasks []Task
+
+func (o Operation) String() string {
+    return operationNames[o]
 }
 
 func (operation Operation) Operate() {
@@ -55,28 +57,102 @@ func (operation Operation) Operate() {
 	}
 }
 
+func main() {
+	fmt.Println("Welcome to the task manager!")
+	ShowHelp()
+	AppLoop()
+}
+
+func AppLoop() {
+	scanner := bufio.NewScanner(os.Stdin)
+	fmt.Print("--> ")
+	for scanner.Scan() {
+		line := scanner.Text()
+		option, err := strconv.Atoi(line)
+		if err != nil || option < 0 || option > int(Help) {
+			fmt.Println("Invalid option, please try again")
+			fmt.Print("--> ")
+			continue
+		}
+		operation := Operation(option)
+
+		operation.Operate()
+
+		fmt.Println()
+		fmt.Print("--> ")
+	}
+
+}
+
+
 func RemoveTask() {
-	panic("unimplemented")
+	idToRemove := GetIdFromUser()
+	removeTaskById(idToRemove)
+}
+
+func removeTaskById(idToRemove int) {
+	if len(tasks) == 0 {
+		fmt.Println("No tasks to remove")
+		fmt.Println()
+		return
+	}
+
+	for i, task := range tasks {
+		if task.ID == idToRemove {
+			tasks = append(tasks[:i], tasks[i+1:]...)
+			break
+		}
+		if i == len(tasks)-1 {
+			fmt.Println("Task not found")
+		}
+	}
 }
 
 func ListTasks() {
-	panic("unimplemented")
+	if len(tasks) == 0 {
+		fmt.Println("No tasks to show")
+		return
+	}
+	for _, task := range tasks {
+		fmt.Printf("ID: %d, Description: %s, Completed: %t\n", task.ID, task.Description, task.Completed)
+	}
 }
 
 func ShowHelp() {
 	fmt.Println("\nThe following commands are available:")
-	fmt.Println("0 - Add a task")
-	fmt.Println("1 - Remove a task")
-	fmt.Println("2 - Complete a task")
-	fmt.Println("3 - List all tasks")
-	fmt.Println("4 - Exit")
-	fmt.Println("5 - Help")
+    for i := 0; i < 5; i++ { 
+        fmt.Println(i, "-", Operation(i))
+    }
 }
 
 func CompleteTask() {
-	panic("unimplemented")
+	id := GetIdFromUser()
+	for i, task := range tasks {
+		if task.ID == id {
+			tasks[i].Completed = true
+			return
+		}
+	}
+}
+
+func GetIdFromUser() int {
+	scanner := bufio.NewScanner(os.Stdin)
+	fmt.Print("Please enter the ID of the task you want to remove: ")
+	scanner.Scan()
+	id, err := strconv.Atoi(scanner.Text())
+
+	if err != nil {
+		fmt.Println("Invalid ID, please try again")
+		return GetIdFromUser()
+	}
+	return id
 }
 
 func AddTask() {
-	panic("unimplemented")
+	scanner := bufio.NewScanner(os.Stdin)
+	fmt.Print("Please enter the description of the task: ")
+	scanner.Scan()
+	description := scanner.Text()
+	tasks = append(tasks, Task{ID: len(tasks), Description: description, Completed: false})
+
 }
